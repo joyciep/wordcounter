@@ -1,0 +1,8 @@
+tests/*
+*.md
+Dockerfile
+*.db
+.pytest_cache/
+__pycache__/
+.coverage
+.vscode/
