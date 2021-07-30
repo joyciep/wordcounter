@@ -9,8 +9,8 @@ def get_application() -> FastAPI:
     application = FastAPI(
         title=settings.app_name, debug=settings.debug, version=VERSION
     )
-    application.add_event_handler("startup", create_startup_handler(application))
-    application.add_event_handler("shutdown", create_shutdown_handler(application))
+    application.add_event_handler("startup", create_startup_handler())
+    application.add_event_handler("shutdown", create_shutdown_handler())
     application.include_router(wordcount.router)
     return application
 

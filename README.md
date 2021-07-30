@@ -1,6 +1,6 @@
 # wordcounter
 
-`wordcounter` is an API which counts how many times a word exists in a given web page
+`wordcounter` is an API which counts how many times a word exists in a given web page.
 
 # Development
 
@@ -11,6 +11,14 @@
 ```
 poetry install
 poetry shell
+```
+
+## App Configuration
+
+```sh
+export DEBUG=true (default: false)
+export CREATE_TABLES=false (default: true)
+export DATABASE_URL=sqlite+aiosqlite:///path/to/wordcounter.db (default: sqlite+aiosqlite:///./wordcounter.db)
 ```
 
 ## Running
@@ -42,14 +50,15 @@ docker build -t wordcounter:v1.0.0 .
 docker run -p 8000:8000 wordcounter:v1.0.0
 ```
 
-# API Contract
+# API Endpoints
 
-Go to http://localhost:8000/docs for the Swagger documentation
+- GET `/docs` or `/redoc` for the API documentation
+- POST `/wordcount` (see `/docs` or `/redoc` for documentation)
 
 # Project Structure
 
 ```
-app
+app - main application code
 ├── api              - API handler / web route
 ├── core             - application configuration, startup events, logging
 ├── db               - database related code
@@ -59,4 +68,5 @@ app
 │   └── schemas      - schemas for using in web route
 ├── services         - logic aside from CRUD
 └── main.py          - FastAPI application creation and configuration.
+tests - unit tests
 ```

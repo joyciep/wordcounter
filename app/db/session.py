@@ -11,7 +11,8 @@ engine = create_async_engine(settings.database_url, future=True, echo=True)
 async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
 
-async def initialize_db(app: FastAPI) -> None:
+async def initialize_db() -> None:
+    """Create tables in database"""
     logger.info("initializing db")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)

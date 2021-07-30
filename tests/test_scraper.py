@@ -9,6 +9,7 @@ from tests.test_cases import test_scraper_data
 @patch("requests.get")
 @pytest.mark.parametrize("test_case", test_scraper_data)
 def test_run_and_get_word_count(mock_request, test_case):
+    """Test for scraper service"""
     s = ScraperService("https://example.com", test_case["word"])
     mock_request.return_value.content = test_case["content"]
     mock_request.return_value.status_code = status.HTTP_200_OK

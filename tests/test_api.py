@@ -20,6 +20,7 @@ async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession
 
 
 async def get_test_word_count_repository():
+    """Get test DB session and initialize WordCountRepository"""
     try:
         session = async_session()
         yield WordCountRepository(session)
@@ -28,6 +29,7 @@ async def get_test_word_count_repository():
 
 
 async def initialize_test_db():
+    """Create tables in test database"""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
@@ -35,17 +37,19 @@ async def initialize_test_db():
 
 @pytest.fixture
 async def application():
+    """Get FastAPI application and override word count repository to use test database"""
     app = get_application()
     await initialize_test_db()
     app.dependency_overrides[get_word_count_repository] = get_test_word_count_repository
     yield app
-    # remove test database
+    # teardown: remove test database
     os.remove("./test.db")
 
 
 @pytest.mark.asyncio
 @patch("requests.get")
 async def test_word_count_api(mock_request, application):
+    """Test for API logic (happy path)"""
     mock_request.return_value.content = test_scraper_data[0]["content"]
     mock_request.return_value.status_code = status.HTTP_200_OK
     async with AsyncClient(app=application, base_url="http://test") as ac:
@@ -68,11 +72,13 @@ async def test_word_count_api(mock_request, application):
 @pytest.mark.asyncio
 @patch("requests.get")
 async def test_word_count_api_scraper_failed(mock_request, application):
+    """Test for scraper failing (exception path)"""
     mock_request.return_value.content = test_scraper_data[0]["content"]
     mock_request.return_value.status_code = status.HTTP_403_FORBIDDEN
     async with AsyncClient(app=application, base_url="http://test") as ac:
         data = {"url": "https://example.com", "word": test_scraper_data[0]["word"]}
         response = await ac.post("/wordcount", json=data)
+
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     data = response.json()
     assert data["status"] == "failed to get URL content"
@@ -82,6 +88,7 @@ async def test_word_count_api_scraper_failed(mock_request, application):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("test_case", test_invalid_requests_data)
 async def test_word_count_api_invalid_requests(test_case, application):
+    """Test for invalid request body (exception path)"""
     async with AsyncClient(app=application, base_url="http://test") as ac:
         response = await ac.post("/wordcount", json=test_case)
 
